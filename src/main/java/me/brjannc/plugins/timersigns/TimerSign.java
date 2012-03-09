@@ -35,4 +35,21 @@ public class TimerSign {
     public void cancelTask() {
         task.cancel();
     }
+
+    public Block getSignBlock() {
+        return signBlock;
+    }
+
+    public long getOnTicks() {
+        return onTicks;
+    }
+
+    public long getOffTicks() {
+        return offTicks;
+    }
+
+    @Override
+    public String toString() {
+        return signBlock.getWorld().getName() + "," + signBlock.getX() + "," + signBlock.getY() + "," + signBlock.getZ() + "," + onTicks + "," + offTicks;
+    }
 }

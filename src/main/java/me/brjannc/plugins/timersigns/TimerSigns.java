@@ -16,10 +16,16 @@
  */
 package me.brjannc.plugins.timersigns;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.logging.Logger;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.event.Listener;
@@ -52,10 +58,63 @@ public class TimerSigns extends JavaPlugin implements Listener {
         if (config.getKeys(true).isEmpty()) {
             config.options().copyDefaults(true);
         }
+
+        loadSigns();
     }
 
     private void shutdown() {
+        saveSigns();
         saveConfig();
+    }
+
+    private void loadSigns() {
+        try {
+            File file = new File(this.getDataFolder(), "signs.csv");
+            if (!file.exists()) {
+                return;
+            }
+            Scanner scanner = new Scanner(file);
+
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine().trim();
+                String[] tokens = line.split(",");
+
+                // world,x,y,z,onTicks,offTicks
+
+                World world = getServer().getWorld(tokens[0]);
+
+                int x = Integer.valueOf(tokens[1]);
+                int y = Integer.valueOf(tokens[2]);
+                int z = Integer.valueOf(tokens[3]);
+
+                long onTicks = Long.valueOf(tokens[4]);
+                long offTicks = Long.valueOf(tokens[5]);
+
+                Block signBlock = world.getBlockAt(x, y, z);
+
+                createTimerSign(signBlock, onTicks, offTicks);
+            }
+
+            scanner.close();
+        } catch (IOException e) {
+            log.warning("[TimerSigns] Error loading signs.csv: " + e);
+        }
+    }
+
+    private void saveSigns() {
+        try {
+            File file = new File(this.getDataFolder(), "signs.csv");
+            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+
+            for (TimerSign timerSign : timerSigns.values()) {
+                writer.append(timerSign.toString());
+                writer.newLine();
+            }
+
+            writer.close();
+        } catch (IOException e) {
+            log.warning("[TimerSigns] Error saving signs.csv: " + e);
+        }
     }
 
     public void createTimerSign(Block signBlock, long onTicks, long offTicks) {
