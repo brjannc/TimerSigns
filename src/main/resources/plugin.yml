@@ -1,0 +1,7 @@
+name: ${project.name}
+version: ${project.version}
+author: brjannc
+description: ${project.description}
+main: me.brjannc.plugins.timersigns.TimerSigns
+load: postworld
+database: false
